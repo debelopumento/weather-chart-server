@@ -16,7 +16,12 @@ try {
 const { PORT, DATABASE_URL } = require("./config");
 console.log("DATABASE_URL: ", DATABASE_URL);
 
-const { History } = require("./models-history");
+//const { History } = require("./models-history");
+const History = mongoose.model(
+	"History",
+	mongoose.Schema(),
+	"historycollection3"
+);
 
 const app = express();
 app.use(bodyParser.json());
@@ -25,7 +30,7 @@ app.use(morgan("common"));
 app.use(express.static("build"));
 
 app.get("/", (req, res) => {
-	res.json({ message: "directional dyslexia" });
+	res.json({ message: "The borrower arriedii" });
 });
 
 app.get("/all", (req, res) => {
@@ -39,24 +44,92 @@ app.get("/all", (req, res) => {
 		});
 });
 
-app.post("/write", (req, res) => {
-	const url =
-		"http://api.wunderground.com/api/c905350f371fe191/history_19600923/q/CA/San_Francisco.json";
+const writeData = date => {
+	const url = `http://api.wunderground.com/api/ae920706c3e19dd4/history_${date}/q/CA/San_Francisco.json`;
+
 	request(url, (error, response, body) => {
 		const parsedBody = JSON.parse(body);
 		const data = parsedBody.history;
+		console.log(19, url);
 		History.create(data)
 			.then(newData => {
 				res.json({ data });
+				console.log("success! ", date);
 			})
 			.catch(e => {
 				res.json({ message: "no" });
 			});
 	});
-});
+};
+writeData("19620715");
+const main = () => {
+	for (let year = 1950; year <= 2017; year++) {
+		for (let mon = 1; mon <= 9; mon++) {
+			for (let mday = 1; mday <= 9; mday++) {
+				const date = `${year}0${mon}0${mday}`;
+				console.log(year, mon, mday);
+				writeData(date);
+			}
+			for (let mday = 10; mday <= 31; mday++) {
+				const date = `${year}0${mon}${mday}`;
+				console.log(year, mon, mday);
+				writeData(date);
+			}
+		}
+		for (let mon = 10; mon <= 12; mon++) {
+			for (let mday = 1; mday <= 9; mday++) {
+				const date = `${year}${mon}0${mday}`;
+				console.log(year, mon, mday);
+				writeData(date);
+			}
+			for (let mday = 10; mday <= 31; mday++) {
+				const date = `${year}${mon}${mday}`;
+				console.log(year, mon, mday);
+				writeData(date);
+			}
+		}
+	}
+};
+//main();
+
+const test = () => {
+	let year = 1970;
+	const writeMonth = mon => {
+		if (year <= 2017) {
+			if (mon < 10) {
+				mon = "0" + mon;
+			}
+			for (let mday = 1; mday <= 31; mday++) {
+				if (mday < 10) {
+					mday = "0" + mday;
+				} else {
+					mday = mday.toString();
+				}
+				const date = `${year}${mon}${mday}`;
+				console.log(year, mon, mday);
+				writeData(date);
+			}
+			if (mon < 12) {
+				mon = Number(mon) + 1;
+				setTimeout(function() {
+					writeMonth(mon);
+				}, 30000);
+			}
+			if (mon === 12) {
+				mon = 1;
+				year++;
+				setTimeout(function() {
+					writeMonth(mon);
+				}, 30000);
+			}
+		}
+	};
+	writeMonth(11);
+};
+test();
 
 app.get("/getHistoryData/:year/:mon/:mday", (req, res) => {
-	History.findOne({
+	History.find({
 		"date.year": req.params.year,
 		"date.mon": req.params.mon,
 		"date.mday": req.params.mday
