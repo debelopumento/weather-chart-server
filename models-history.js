@@ -1,75 +1,11 @@
 const mongoose = require("mongoose");
 
 const historySchema = mongoose.Schema({
-	date: {
-		pretty: String,
-		year: String,
-		mon: String,
-		mday: String,
-		hour: String,
-		min: String,
-		tzname: String
-	},
-	utcdate: {
-		pretty: String,
-		year: String,
-		mon: String,
-		mday: String,
-		hour: String,
-		min: String,
-		tzname: String
-	},
-	observations: [
-		{
-			date: {
-				pretty: String,
-				year: String,
-				mon: String,
-				mday: String,
-				hour: String,
-				min: String,
-				tzname: String
-			},
-			utcdate: {
-				pretty: String,
-				year: String,
-				mon: String,
-				mday: String,
-				hour: String,
-				min: String,
-				tzname: String
-			},
-			tempm: String,
-			tempi: String,
-			dewptm: String,
-			dewpti: String
-		}
-	],
-	dailysummary: [
-		{
-			date: {
-				pretty: String,
-				year: String,
-				mon: String,
-				mday: String,
-				hour: String,
-				min: String,
-				tzname: String
-			},
-			meantempm: String,
-			meantempi: String,
-			meandewptm: String,
-			meandewpti: String,
-			maxtempm: String,
-			maxtempi: String,
-			mintempm: String,
-			mintempi: String,
-			maxdewptm: String,
-			maxdewpti: String,
-			mindewptm: String,
-			mindewpti: String
-		}
-	]
+	id: String,
+	date: {},
+	utcdate: {},
+	observations: {},
+	dailysummary: {}
 });
 
 historySchema.methods.apiRepr = () => {

@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 const cors = require("cors");
+const request = require("request");
 
 mongoose.Promise = global.Promise;
 
@@ -27,8 +28,31 @@ app.get("/", (req, res) => {
 	res.json({ message: "directional dyslexia" });
 });
 
-app.use("*", function(req, res) {
-	res.status(404).json({ message: "Not Found" });
+app.get("/all", (req, res) => {
+	History.find()
+		.exec()
+		.then(data => {
+			res.json({ data: data });
+		})
+		.catch(e => {
+			res.json({ e });
+		});
+});
+
+app.post("/write", (req, res) => {
+	const url =
+		"http://api.wunderground.com/api/c905350f371fe191/history_19600815/q/CA/San_Francisco.json";
+	request(url, (error, response, body) => {
+		const parsedBody = JSON.parse(body);
+		const data = parsedBody.history;
+		History.create(data)
+			.then(newData => {
+				res.json({ data });
+			})
+			.catch(e => {
+				res.json({ message: "no" });
+			});
+	});
 });
 
 let server;
