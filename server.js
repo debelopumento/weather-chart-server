@@ -41,7 +41,7 @@ app.get("/all", (req, res) => {
 
 app.post("/write", (req, res) => {
 	const url =
-		"http://api.wunderground.com/api/c905350f371fe191/history_19600815/q/CA/San_Francisco.json";
+		"http://api.wunderground.com/api/c905350f371fe191/history_19600923/q/CA/San_Francisco.json";
 	request(url, (error, response, body) => {
 		const parsedBody = JSON.parse(body);
 		const data = parsedBody.history;
@@ -53,6 +53,21 @@ app.post("/write", (req, res) => {
 				res.json({ message: "no" });
 			});
 	});
+});
+
+app.get("/getHistoryData/:year/:mon/:mday", (req, res) => {
+	History.findOne({
+		"date.year": req.params.year,
+		"date.mon": req.params.mon,
+		"date.mday": req.params.mday
+	})
+		.exec()
+		.then(result => {
+			res.json({ result });
+		})
+		.catch(e => {
+			res.json({ message: "Internal server error." });
+		});
 });
 
 let server;
