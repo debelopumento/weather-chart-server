@@ -16,12 +16,8 @@ try {
 const { PORT, DATABASE_URL } = require("./config");
 console.log("DATABASE_URL: ", DATABASE_URL);
 
-//const { History } = require("./models-history");
-const History = mongoose.model(
-	"History",
-	mongoose.Schema(),
-	"historycollection3"
-);
+const { History } = require("./models-history");
+//const History = mongoose.model("History", mongoose.Schema(), "historycollection3")
 
 const app = express();
 app.use(bodyParser.json());
@@ -51,7 +47,26 @@ const writeData = date => {
 		const parsedBody = JSON.parse(body);
 		const data = parsedBody.history;
 		console.log(19, url);
-		History.create(data)
+		const newDataObservations = data.observations.map(observation => {
+			return {
+				tempi: observation.tempi
+			};
+		});
+		const newData = {
+			date: {
+				year: data.date.year,
+				mon: data.date.mon,
+				mday: data.date.mday
+			},
+			dailysummary: [
+				{
+					maxtempi: data.dailysummary[0].maxtempi,
+					mintempi: data.dailysummary[0].mintempi
+				}
+			],
+			observations: newDataObservations
+		};
+		History.create(newData)
 			.then(newData => {
 				res.json({ data });
 				console.log("success! ", date);
@@ -61,7 +76,7 @@ const writeData = date => {
 			});
 	});
 };
-writeData("19620715");
+
 const main = () => {
 	for (let year = 1950; year <= 2017; year++) {
 		for (let mon = 1; mon <= 9; mon++) {
@@ -93,9 +108,9 @@ const main = () => {
 //main();
 
 const test = () => {
-	let year = 1970;
+	let year = 1965;
 	const writeMonth = mon => {
-		if (year <= 2017) {
+		if (year <= 1977) {
 			if (mon < 10) {
 				mon = "0" + mon;
 			}
@@ -124,7 +139,7 @@ const test = () => {
 			}
 		}
 	};
-	writeMonth(11);
+	writeMonth(1);
 };
 test();
 
@@ -133,6 +148,24 @@ app.get("/getHistoryData/:year/:mon/:mday", (req, res) => {
 		"date.year": req.params.year,
 		"date.mon": req.params.mon,
 		"date.mday": req.params.mday
+	})
+		.exec()
+		.then(result => {
+			res.json({ result });
+		})
+		.catch(e => {
+			res.json({ message: "Internal server error." });
+		});
+});
+
+app.get("/getHistoryData/:date", (req, res) => {
+	const year = req.params.date.slice(0, 4);
+	const mon = req.params.date.slice(4, 6);
+	const mday = req.params.date.slice(6, 8);
+	History.find({
+		"date.year": year,
+		"date.mon": mon,
+		"date.mday": mday
 	})
 		.exec()
 		.then(result => {
