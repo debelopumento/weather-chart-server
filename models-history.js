@@ -18,6 +18,6 @@ historySchema.methods.apiRepr = () => {
 	};
 };
 
-const History = mongoose.model("History", historySchema, "historycollection3");
+const History = mongoose.model("History", historySchema, "historycollection");
 
 module.exports = { History };
